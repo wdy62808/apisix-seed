@@ -1,7 +1,7 @@
 package discoverer
 
 import (
-	"fmt"
+	"reflect"
 
 	"github.com/api7/gopkg/pkg/log"
 
@@ -15,6 +15,11 @@ var (
 var discovererHub = map[string]Discoverer{}
 
 func InitDiscoverer(key string, disConfig interface{}) error {
+	if _, ok := Discoveries[key]; !ok {
+		log.Warnf("New Discoverer %s is only support:%v", key, reflect.ValueOf(Discoveries).MapKeys())
+		return nil
+	}
+
 	discoverer, err := Discoveries[key](disConfig)
 	if err != nil {
 		log.Errorf("New %s Discoverer err: %s", key, err)
@@ -39,7 +44,8 @@ func GetDiscoverer(key string) Discoverer {
 	if d, ok := discovererHub[key]; ok {
 		return d
 	}
-	panic(fmt.Sprintf("no discoverer with key: %s", key))
+	log.Warnf("no discoverer with key: %s", key)
+	return nil
 }
 
 func GetDiscoverers() []Discoverer {

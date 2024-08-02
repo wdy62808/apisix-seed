@@ -47,18 +47,27 @@ func NewMessage(key string, value []byte, version int64, action StoreEvent, a6Ty
 
 func (msg *Message) ServiceName() string {
 	up := msg.a6Conf.GetUpstream()
-	if up.ServiceName != "" {
-		return up.ServiceName
+	if service, ok := up.Labels["discovery_service"]; ok {
+		return service
 	}
-	return up.DupServiceName
+	if up.Labels == nil {
+		up.Labels = make(map[string]string)
+	}
+	up.Labels["discovery_service"] = up.ServiceName
+	return up.ServiceName
 }
 
 func (msg *Message) DiscoveryType() string {
 	up := msg.a6Conf.GetUpstream()
-	if up.DiscoveryType != "" {
-		return up.DiscoveryType
+	if discoveryType, ok := up.Labels["discovery_type"]; ok {
+		return discoveryType
 	}
-	return up.DupDiscoveryType
+
+	if up.Labels == nil {
+		up.Labels = make(map[string]string)
+	}
+	up.Labels["discovery_type"] = up.DiscoveryType
+	return up.DiscoveryType
 }
 
 func (msg *Message) DiscoveryArgs() map[string]interface{} {

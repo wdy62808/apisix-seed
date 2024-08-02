@@ -13,12 +13,11 @@ type UpstreamArg struct {
 }
 
 type Upstream struct {
-	Nodes            interface{}  `json:"nodes,omitempty"`
-	DiscoveryType    string       `json:"discovery_type,omitempty"`
-	DupDiscoveryType string       `json:"_discovery_type,omitempty"`
-	DiscoveryArgs    *UpstreamArg `json:"discovery_args,omitempty"`
-	DupServiceName   string       `json:"_service_name,omitempty"`
-	ServiceName      string       `json:"service_name,omitempty"`
+	Nodes         interface{}       `json:"nodes,omitempty"`
+	DiscoveryType string            `json:"discovery_type,omitempty"`
+	DiscoveryArgs *UpstreamArg      `json:"discovery_args,omitempty"`
+	ServiceName   string            `json:"service_name,omitempty"`
+	Labels        map[string]string `json:"labels,omitempty"`
 }
 
 const (
@@ -102,9 +101,34 @@ func embedElm(v reflect.Value, all map[string]interface{}) {
 			continue
 		}
 
-		if fieldName == "DiscoveryType" || fieldName == "ServiceName" {
-			all["_"+tagName] = val.Interface()
+		if fieldName == "DiscoveryType" {
 			delete(all, tagName)
+			if vv, ok := all["labels"]; ok {
+				if m, has := vv.(map[string]interface{}); has {
+					m["discovery_type"] = val.Interface()
+				}
+				continue
+			}
+
+			all["labels"] = map[string]interface{}{
+				"discovery_type": val.Interface(),
+			}
+
+			continue
+		}
+
+		if fieldName == "ServiceName" {
+			delete(all, tagName)
+			if vv, ok := all["labels"]; ok {
+				if m, has := vv.(map[string]interface{}); has {
+					m["discovery_service"] = val.Interface()
+				}
+				continue
+			}
+
+			all["labels"] = map[string]interface{}{
+				"discovery_service": val.Interface(),
+			}
 			continue
 		}
 
