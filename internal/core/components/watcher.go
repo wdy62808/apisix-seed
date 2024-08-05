@@ -161,7 +161,7 @@ func (w *Watcher) update(msg *message.Message, s *storer.GenericStore) {
 
 		oldDis := discoverer.GetDiscoverer(oldMsg.DiscoveryType())
 		if oldDis != nil {
-			_ = dis.Delete(oldMsg)
+			_ = oldDis.Delete(oldMsg)
 		}
 
 		dis = discoverer.GetDiscoverer(msg.DiscoveryType())
